@@ -28,7 +28,7 @@ program = sys.argv[0]
 __version__ = 'Python Gevent SMTP server version 0.1'
 
 
-logger = logging.getLogger('mailer')
+logger = logging.getLogger('gsmtpd')
 logger.setLevel(logging.DEBUG)
 #handler = logging.handlers.SysLogHandler(address='/dev/log', facility="mail")
 handler = logging.StreamHandler()
