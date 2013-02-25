@@ -19,10 +19,9 @@ For LMTP:
 ```python
 class TestServer(LMTPServer):
 def process_message(self, peer, mailfrom, rcpttos, data):
-    def process(rcpt):
+    for rcpt in rcpttos:
         print peer, mailfrom, rcpt, len(data)
-        return "250 Ok"
-    return map(process, rcpttos)
+        yield "250 Ok"
 
 s = TestServer(("127.1", 4000))
 s.serve_forever()
