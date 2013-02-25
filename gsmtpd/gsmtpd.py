@@ -86,7 +86,8 @@ class SMTPChannel(object):
                     arg = line[i + 1:].strip()
                 method = getattr(self, 'smtp_' + command, None)
                 if not method:
-                    self.push('502 Error: command "%s" not implemented' % command)
+                    self.push('502 Error: command '
+                              '"%s" not implemented' % command)
                     continue
                 method(arg)
             else:
@@ -100,18 +101,32 @@ class SMTPChannel(object):
                                                              self.__mailfrom,
                                                              self.__rcpttos,
                                                              "".join(body))
+
+                    if isinstance(self.__server, LMTPServer):
+                        if statuses:
+                            try:
+                                # check if it's iterable
+                                statuses_iterator = iter(statuses)
+                                for status in statuses_iterator:
+                                    if not status:
+                                        self.push('250 Ok')
+                                    else:
+                                        self.push(status)
+                            except TypeError as te:
+                                raise Exception("Please, yield some iterables"
+                                                "for LMTPServer")
+                        else:
+                            for _ in range(len(self.__rcpttos)):
+                                self.push('250 Ok')
+                    else:
+                        if statuses:
+                            self.push(statuses)
+                        else:
+                            self.push('250 Ok')
+
                     self.__rcpttos = []
                     self.__mailfrom = None
                     self.__datastate = False
-                    if statuses:
-                        for status in statuses:
-                            if not status:
-                                self.push('250 Ok')
-                            else:
-                                self.push(status)
-                    else:
-                        for n in xrange(len(self.__rcpttos) + 1):
-                            self.push('250 Ok')
         logger.info("closing connection")
         self.__file.close()
         self.__conn.close()
@@ -260,9 +275,12 @@ class LMTPServer(SMTPServer):
 
 
 if __name__ == "__main__":
-    class TestServer(SMTPServer):
+    class TestServer(LMTPServer):
         def process_message(self, peer, mailfrom, rcpttos, data):
-            print peer, mailfrom, rcpttos, len(data)
+            for rcpt in rcpttos:
+                print peer, mailfrom, rcpt, len(data)
+                # You can yield None here, it means "250 Ok"
+                yield
 
     s = TestServer(("127.1", 4000))
     s.serve_forever()
