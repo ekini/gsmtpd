@@ -7,6 +7,8 @@ For LMTPServer `process_message` function can return `None` or a list of SMTP st
 ## Examples
 
 ```python
+from gsmtpd import SMTPServer
+
 class TestServer(SMTPServer):
 def process_message(self, peer, mailfrom, rcpttos, data):
     print peer, mailfrom, rcpttos, len(data)
@@ -17,6 +19,8 @@ s.serve_forever()
 
 For LMTP:
 ```python
+from gsmtpd import SMTPServer
+
 class TestServer(LMTPServer):
 def process_message(self, peer, mailfrom, rcpttos, data):
     for rcpt in rcpttos:
