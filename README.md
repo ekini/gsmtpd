@@ -19,7 +19,7 @@ s.serve_forever()
 
 For LMTP:
 ```python
-from gsmtpd import SMTPServer
+from gsmtpd import LMTPServer
 
 class TestServer(LMTPServer):
 def process_message(self, peer, mailfrom, rcpttos, data):
